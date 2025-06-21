@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Dimensions, FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Card,
@@ -22,6 +22,7 @@ const HomeScreen = () => {
   const { user, logout } = useAuth(); // Get current user
   const [records, setRecords] = useState<TeachingRecord[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const screenHeight = Dimensions.get('window').height;
 
   // Form state
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
@@ -113,18 +114,17 @@ const HomeScreen = () => {
         <Modal
           visible={modalVisible}
           onDismiss={hideModal}
-          contentContainerStyle={[styles.modalContentContainer, { backgroundColor: theme.colors.elevation.level3 }]} // Use elevation for modal background
-          // Consider adding animationType="slide" or "fade" if desired, though Paper Modal has its own.
+          contentContainerStyle={[styles.modalContentContainer, { maxHeight: screenHeight * 0.95 }]}
         >
-          <Card style={styles.modalCard}>
+          <Card style={[styles.modalCard, { maxHeight: screenHeight * 0.92 }]}>
             <Card.Title
               title="Add New Teaching Record"
               titleVariant="headlineSmall"
               titleStyle={{color: theme.colors.primary, textAlign: 'center'}}
               right={(props) => <IconButton {...props} icon="close-circle-outline" onPress={hideModal} />}
             />
-            <Card.Content>
-              <ScrollView>
+            <Card.Content style={{ flex: 1, paddingBottom: 0 }}>
+              <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: screenHeight * 0.7 }} contentContainerStyle={{ paddingBottom: 16 }}>
                 {formError ? <Text style={[styles.errorText, {color: theme.colors.error}]}>{formError}</Text> : null}
 
                 <View style={styles.formSection}>
@@ -307,12 +307,12 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 0,
     // marginHorizontal: 0,
   },
-  chipGroupContainer:{
+  chipGroupContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8, // Space between chips
-    marginBottom: 10, // Space below the chip group
-  }
+  },
+  subjectChip: { marginRight: 6, marginBottom: 6, borderRadius: 16, paddingHorizontal: 8, paddingVertical: 2 },
+  subjectChipText: { fontSize: 14, fontWeight: '500' },
 });
 
 export default HomeScreen;

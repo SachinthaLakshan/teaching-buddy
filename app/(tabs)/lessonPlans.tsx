@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Dimensions, FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Card,
@@ -25,6 +25,7 @@ import { useAuth } from '../services/AuthContext';
 const LessonPlansScreen = () => {
   const theme = useTheme();
   const { user } = useAuth();
+  const screenHeight = Dimensions.get('window').height;
   const [lessonPlans, setLessonPlans] = useState<LessonPlan[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -197,19 +198,20 @@ const LessonPlansScreen = () => {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={styles.emptyText}>No lesson plans found. Create one!</Text>}
+        style={{ flex: 1 }}
       />
 
       <Portal>
-        <Modal visible={modalVisible} onDismiss={hideModal} contentContainerStyle={[styles.modalContentContainer, { backgroundColor: theme.colors.elevation.level3 }]}>
-          <Card style={styles.modalCard}>
+        <Modal visible={modalVisible} onDismiss={hideModal} contentContainerStyle={[styles.modalContentContainer, {  maxHeight: screenHeight * 0.95 }]}>
+          <Card style={[styles.modalCard, { maxHeight: screenHeight * 0.92 }]}>
             <Card.Title
               title="Create Lesson Plan"
               titleVariant="headlineSmall"
               titleStyle={{color: theme.colors.primary, textAlign: 'center'}}
               right={(props) => <IconButton {...props} icon="close-circle-outline" onPress={hideModal} />}
             />
-            <Card.Content>
-              <ScrollView keyboardShouldPersistTaps="handled">
+            <Card.Content style={{ flex: 1, paddingBottom: 0 }}>
+              <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: screenHeight * 0.7 }} contentContainerStyle={{ paddingBottom: 16 }}>
                 {formError ? <Text style={[styles.errorText, {color: theme.colors.error}]}>{formError}</Text> : null}
 
                 <TextInput label="Lesson Plan Title" value={title} onChangeText={setTitle} mode="outlined" style={styles.input} outlineStyle={{borderRadius: theme.roundness}} />
@@ -253,7 +255,7 @@ const LessonPlansScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: { flex: 1, padding: 8, minHeight: 0 },
   title: { textAlign: 'center', marginBottom: 16 },
   addButton: { marginBottom: 16, paddingVertical: 6, borderRadius: 20 },
   list: { paddingBottom: 16 },
@@ -263,8 +265,8 @@ const styles = StyleSheet.create({
   paragraphContent: { marginLeft: 16, fontSize: 14 }, // Color applied inline now
   emptyText: { textAlign: 'center', marginTop: 30, fontSize: 16 }, // Color applied inline now
   // Modal Styles
-  modalContentContainer: { justifyContent: 'center', alignItems: 'center', padding: 10 }, // Reduced padding for modal itself
-  modalCard: { width: '100%', maxWidth: 600, borderRadius: 16, elevation: 5, maxHeight: '95%' }, // Max height for scroll
+  modalContentContainer: { justifyContent: 'center', alignItems: 'center', padding: 4, width: '100%' },
+  modalCard: { width: '100%', maxWidth: 600, borderRadius: 16, elevation: 5, maxHeight: '95%', minHeight: 0 },
   modalActions: { justifyContent: 'flex-end', paddingTop:8, paddingBottom: 16, paddingRight: 8 },
   input: { marginBottom: 12 },
   button: { marginHorizontal: 8, minWidth: 100 },
@@ -278,7 +280,9 @@ const styles = StyleSheet.create({
   dynamicListContainer: { marginBottom: 16 },
   dynamicListItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   dynamicInput: { flex: 1, marginRight: 4 },
-  chipGroupContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }
+  chipGroupContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  subjectChip: { marginRight: 6, marginBottom: 6, borderRadius: 16, paddingHorizontal: 8, paddingVertical: 2 },
+  subjectChipText: { fontSize: 14, fontWeight: '500' },
 });
 
 export default LessonPlansScreen;
