@@ -34,8 +34,11 @@ const HomeScreen = () => {
   const periods = [1, 2, 3, 4, 5, 6, 7, 8];
 
   useEffect(() => {
+    
+    
     fetch(`${BASE_URL}/api/subjects`).then(res => res.json()).then(setSubjects).catch(console.error);
     if (user) {
+      console.log("user", user);
       fetch(`${BASE_URL}/api/teaching-records/user/${user.id}`).then(res => res.json()).then(setRecords).catch(console.error);
     }
   }, [user]);
@@ -141,11 +144,11 @@ const HomeScreen = () => {
                   <View style={styles.chipGroupContainer}>
                     {subjects.map((subject: any) => (
                       <Chip
-                        key={subject.id}
-                        selected={selectedSubjectId === subject.id}
-                        onPress={() => setSelectedSubjectId(subject.id)}
-                        style={[styles.subjectChip, selectedSubjectId === subject.id ? {backgroundColor: theme.colors.primaryContainer} : {}]}
-                        textStyle={[styles.subjectChipText, selectedSubjectId === subject.id ? {color: theme.colors.onPrimaryContainer} : {}]}
+                        key={subject._id}
+                        selected={selectedSubjectId === subject._id}
+                        onPress={() => setSelectedSubjectId(subject._id)}
+                        style={[styles.subjectChip, selectedSubjectId === subject._id ? {backgroundColor: theme.colors.primaryContainer} : {}]}
+                        textStyle={[styles.subjectChipText, selectedSubjectId === subject._id ? {color: theme.colors.onPrimaryContainer} : {}]}
                       >
                         {subject.name}
                       </Chip>

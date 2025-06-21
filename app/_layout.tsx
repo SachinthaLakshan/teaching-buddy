@@ -1,11 +1,13 @@
 import { useFonts } from 'expo-font';
-import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
+import { Slot, SplashScreen, Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import 'react-native-reanimated';
-import { AuthProvider, useAuth } from './services/AuthContext'; // Corrected path
+import SplashScreenComponent from '../components/SplashScreen';
+// import { AuthProvider, useAuth } from '../services/AuthContext';
+import { AuthProvider, useAuth } from './services/AuthContext';
 import { appTheme } from './theme/theme'; // Corrected path
 
 // Keep the splash screen visible while we fetch resources
@@ -29,8 +31,9 @@ const InitialLayout = () => {
     SplashScreen.hideAsync(); // Hide splash screen once everything is ready
 
     const inAuthGroup = segments[0] === 'auth';
+    const isRegister = inAuthGroup && segments[1] === 'register';
 
-    if (!user && !inAuthGroup) {
+    if (!user && !inAuthGroup && !isRegister) {
       router.replace('/auth/login');
     } else if (user && inAuthGroup) {
       router.replace('/(tabs)/home');
@@ -62,7 +65,15 @@ const InitialLayout = () => {
   );
 };
 
-export default function RootLayout() {
+function RootLayout() {
+  const { isLoading } = useAuth();
+  if (isLoading) {
+    return <SplashScreenComponent />;
+  }
+  return <Slot />;
+}
+
+export default function Layout() {
   // The `useFonts` hook and other preliminary checks can be here or within InitialLayout.
   // For simplicity with SplashScreen, keeping font loading logic tied with auth loading.
 
@@ -70,7 +81,7 @@ export default function RootLayout() {
     <AuthProvider>
       <PaperProvider theme={appTheme}>
         <StatusBar style="light" backgroundColor={appTheme.colors.primary} />
-        <InitialLayout />
+        <RootLayout />
       </PaperProvider>
     </AuthProvider>
   );

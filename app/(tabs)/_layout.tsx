@@ -1,5 +1,5 @@
-import React from 'react';
 import { Tabs } from 'expo-router';
+import React from 'react';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 // Import Text from react-native-paper if you want to use its theming for labels more directly,
@@ -75,3 +75,4 @@ export default function TabLayout() {
 
 // Need to import StyleSheet for hairlineWidth
 import { StyleSheet } from 'react-native';
+

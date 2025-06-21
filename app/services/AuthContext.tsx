@@ -12,6 +12,7 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
+  isLoading: boolean;
   signin: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
@@ -28,24 +29,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const segments = useSegments();
   const navigationState = useRootNavigationState();
 
-
-  useEffect(() => {
-    // This effect runs when navigationState.key changes, indicating navigator is ready
-    if (!navigationState?.key) return;
-
-    const inAuthGroup = segments[0] === '(auth)'; // Assuming auth routes are in an (auth) group
-
-    if (!user && !inAuthGroup && !isLoading) {
-      console.log("User not authenticated, not in auth group, redirecting to login.");
-      router.replace('/auth/login');
-    } else if (user && inAuthGroup && !isLoading) {
-      console.log("User authenticated, in auth group, redirecting to home.");
-      router.replace('/(tabs)/home');
-    }
-    // If isLoading is true, we don't do anything yet, waiting for auth state determination
-  }, [user, segments, navigationState?.key, isLoading, router]);
-
-
   useEffect(() => {
     // Simulate checking for a stored session on app startup
     const checkUserSession = async () => {
@@ -58,7 +41,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkUserSession();
   }, []);
 
-
   const signin = async (email: string, password: string) => {
     const res = await fetch(`${BASE_URL}/api/users/signin`, {
       method: 'POST',
@@ -67,6 +49,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     if (!res.ok) {
       throw new Error('Invalid credentials');
+    }else{
+      router.replace('/(tabs)/home');
     }
     const data = await res.json();
     setUser(data.user);
@@ -84,6 +68,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     if (!res.ok) {
       throw new Error('Signup failed');
+    }else{
+      router.replace('/(tabs)/home');
     }
     // Optionally auto-login after signup
     await signin(email, password);
@@ -95,7 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, signin, signup, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, signin, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
