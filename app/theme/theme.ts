@@ -10,7 +10,7 @@ export const appTheme: Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,     // Start with defaults
-    primary: '#FADADD',          // Soft Pink
+    primary: '#FFA07A',          // Soft Pink
     onPrimary: '#4A4A4A',        // Deep Taupe (good contrast on soft pink)
     primaryContainer: '#F9E2E7', // Pale Rose (using Highlight for primary container)
     onPrimaryContainer: '#4A4A4A',// Deep Taupe

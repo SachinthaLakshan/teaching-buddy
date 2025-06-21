@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, Alert, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import {
-  TextInput,
   Button,
-  Text,
-  useTheme,
   Card,
-  Title,
-  Paragraph,
+  Chip,
+  IconButton, // For displaying objectives/activities as tags
+  List,
   Modal,
+  Paragraph,
   Portal,
-  IconButton,
-  Divider,
-  Chip, // For displaying objectives/activities as tags
-  List, // For objectives/activities list
-  RadioButton, // For subject selection in modal
+  Text,
+  TextInput,
+  useTheme
 } from 'react-native-paper';
 import {
-  LessonPlan,
-  getLessonPlansForUser,
   addLessonPlan,
-  subjects as allSubjects, // Re-use subjects from dummyData
+  subjects as allSubjects,
+  getLessonPlansForUser,
+  LessonPlan, // Re-use subjects from dummyData
   Subject,
 } from '../data/dummyData';
 import { useAuth } from '../services/AuthContext';
@@ -281,6 +278,7 @@ const styles = StyleSheet.create({
   dynamicListContainer: { marginBottom: 16 },
   dynamicListItem: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   dynamicInput: { flex: 1, marginRight: 4 },
+  chipGroupContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }
 });
 
 export default LessonPlansScreen;

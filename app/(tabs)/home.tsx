@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, Alert, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import {
-  TextInput,
   Button,
-  Text,
-  useTheme,
   Card,
-  Title,
-  Paragraph,
+  Chip,
+  IconButton,
   Modal,
+  Paragraph,
   Portal,
   RadioButton,
-  IconButton, // Added for potential logout or other actions
+  Text,
+  TextInput,
+  Title,
+  useTheme,
 } from 'react-native-paper';
-import { subjects as allSubjects, teachingRecords as initialRecords, addTeachingRecord, getRecordsForUser, TeachingRecord, Subject } from '../data/dummyData'; // Corrected path assuming data is in app/data
+import { addTeachingRecord, subjects as allSubjects, getRecordsForUser, Subject, TeachingRecord } from '../data/dummyData'; // Corrected path assuming data is in app/data
 import { useAuth } from '../services/AuthContext'; // Corrected path
 
 const HomeScreen = () => {
@@ -306,6 +307,12 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 0,
     // marginHorizontal: 0,
   },
+  chipGroupContainer:{
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8, // Space between chips
+    marginBottom: 10, // Space below the chip group
+  }
 });
 
 export default HomeScreen;
