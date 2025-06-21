@@ -8,68 +8,74 @@ import {
   Card,
   Title,
   Paragraph,
-  IconButton,
   Modal,
   Portal,
-  Provider as PaperProvider, // Renamed to avoid conflict if used elsewhere
-  Dialog,
   RadioButton,
+  IconButton, // Added for potential logout or other actions
 } from 'react-native-paper';
-import { subjects as allSubjects, teachingRecords, addTeachingRecord, getRecordsForUser } from '../../data/dummyData';
-// For a real app, user context would be used to get current user ID
-const MOCK_USER_ID = '1'; // Assuming user '1' is logged in for now
+import { subjects as allSubjects, teachingRecords as initialRecords, addTeachingRecord, getRecordsForUser, TeachingRecord, Subject } from '../../data/dummyData'; // Corrected path assuming data is in app/data
+import { useAuth } from '../../services/AuthContext'; // Corrected path
 
-const HomeScreen = ({ navigation }) => {
+const HomeScreen = () => {
   const theme = useTheme();
-  const [records, setRecords] = useState([]);
+  const { user, logout } = useAuth(); // Get current user
+  const [records, setRecords] = useState<TeachingRecord[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
   // Form state
-  const [selectedSubject, setSelectedSubject] = useState('');
-  const [selectedPeriod, setSelectedPeriod] = useState(''); // Store as string
-  const [description, setDescription] = useState('');
-  const [formError, setFormError] = useState('');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
+  const [selectedPeriod, setSelectedPeriod] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [formError, setFormError] = useState<string>('');
 
-  const periods = [1, 2, 3, 4, 5, 6, 7, 8]; // Example periods
+  const periods: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
 
   useEffect(() => {
-    // Load records for the current user
-    const userRecords = getRecordsForUser(MOCK_USER_ID).sort((a, b) => new Date(b.date) - new Date(a.date) || b.period - a.period);
-    setRecords(userRecords);
-  }, []);
+    if (user) {
+      const userRecords = getRecordsForUser(user.id).sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || b.period - a.period
+      );
+      setRecords(userRecords);
+    }
+  }, [user]); // Reload records if user changes or on initial load for the user
 
   const showModal = () => setModalVisible(true);
   const hideModal = () => {
     setModalVisible(false);
-    // Reset form
-    setSelectedSubject('');
+    setSelectedSubjectId('');
     setSelectedPeriod('');
     setDescription('');
     setFormError('');
   };
 
   const handleAddRecord = () => {
-    if (!selectedSubject || !selectedPeriod || !description.trim()) {
+    if (!selectedSubjectId || !selectedPeriod || !description.trim()) {
       setFormError('All fields are required.');
+      return;
+    }
+    if (!user) {
+      Alert.alert("Error", "You must be logged in to add records.");
       return;
     }
     setFormError('');
 
     const newRecordData = {
-      userId: MOCK_USER_ID,
+      userId: user.id,
       date: new Date().toISOString().split('T')[0], // Today's date
       period: parseInt(selectedPeriod, 10),
-      subjectId: selectedSubject,
+      subjectId: selectedSubjectId,
       description: description.trim(),
     };
 
-    const addedRecord = addTeachingRecord(newRecordData); // Add to dummy data
-    setRecords(prevRecords => [addedRecord, ...prevRecords].sort((a, b) => new Date(b.date) - new Date(a.date) || b.period - a.period));
+    const addedRecord = addTeachingRecord(newRecordData);
+    setRecords(prevRecords => [addedRecord, ...prevRecords].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || b.period - a.period
+    ));
     hideModal();
     Alert.alert('Success', 'Teaching record added successfully.');
   };
 
-  const renderRecordItem = ({ item }) => (
+  const renderRecordItem = ({ item }: { item: TeachingRecord }) => (
     <Card style={styles.card}>
       <Card.Content>
         <Title style={{ color: theme.colors.primary }}>{item.subjectName} - Period {item.period}</Title>
@@ -80,13 +86,15 @@ const HomeScreen = ({ navigation }) => {
   );
 
   return (
-    // PaperProvider is needed for Modal, Dialog etc. If already at App root, this might be redundant
-    // However, for screen-level components that use Portal, it's often included.
-    // Let's assume App.js will have the main PaperProvider.
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.primary }]}>
-        Daily Teaching Records
-      </Text>
+      <View style={styles.header}>
+        <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.primary }]}>
+          Daily Records
+        </Text>
+        {/* Optional: Logout button or user display */}
+        {/* <IconButton icon="logout" onPress={logout} /> */}
+      </View>
+
 
       <Button icon="plus-circle" mode="contained" onPress={showModal} style={styles.addButton}>
         Add New Record
@@ -97,7 +105,7 @@ const HomeScreen = ({ navigation }) => {
         renderItem={renderRecordItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.emptyText}>No records found. Add one!</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>No records found for {user?.name || 'current user'}. Add one!</Text>}
       />
 
       <Portal>
@@ -108,8 +116,8 @@ const HomeScreen = ({ navigation }) => {
             {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
 
             <Text style={styles.label}>Subject:</Text>
-            <RadioButton.Group onValueChange={newValue => setSelectedSubject(newValue)} value={selectedSubject}>
-              {allSubjects.map(subject => (
+            <RadioButton.Group onValueChange={newValue => setSelectedSubjectId(newValue)} value={selectedSubjectId}>
+              {allSubjects.map((subject: Subject) => (
                 <RadioButton.Item key={subject.id} label={subject.name} value={subject.id} />
               ))}
             </RadioButton.Group>
@@ -124,7 +132,6 @@ const HomeScreen = ({ navigation }) => {
                 ))}
               </View>
             </RadioButton.Group>
-
 
             <TextInput
               label="Description of Work Done"
@@ -153,9 +160,15 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   title: {
     textAlign: 'center',
-    marginBottom: 16,
+    flex: 1, // Allows title to center even if an icon button is on one side
   },
   addButton: {
     marginBottom: 16,
@@ -178,12 +191,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'grey',
   },
-  // Modal Styles
   modalContainer: {
     padding: 20,
     margin: 20,
     borderRadius: 8,
-    maxHeight: '90%', // Ensure modal is scrollable if content is long
+    maxHeight: '90%',
   },
   modalTitle: {
     marginBottom: 20,
@@ -202,7 +214,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   errorText: {
-    color: 'red',
+    color: 'red', // Consider using theme.colors.error
     marginBottom: 10,
     textAlign: 'center',
   },
@@ -213,10 +225,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   radioButtonWrapper: {
-    width: '25%', // Adjust for 4 items per row roughly
+    width: '25%',
   },
-   periodRadioButton: {
-    paddingHorizontal: 0, // Reduce padding to fit more items
+  periodRadioButton: {
+    paddingHorizontal: 0,
     marginHorizontal: 0,
   },
 });

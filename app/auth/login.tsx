@@ -1,34 +1,38 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import { TextInput, Button, Text, useTheme } from 'react-native-paper'; // Removed PaperProvider, not needed here
-import { users } from '../../data/dummyData';
-import { AuthContext } from '../../navigation/AuthContext'; // Import AuthContext
+import { TextInput, Button, Text, useTheme } from 'react-native-paper';
+import { useAuth } from '../../services/AuthContext'; // Corrected path
+import { Link, useRouter } from 'expo-router';
 
-const TeacherLoginScreen = ({ navigation }) => {
+const TeacherLoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
-  const { login } = useContext(AuthContext); // Use login from AuthContext
+  const { login } = useAuth();
+  const router = useRouter();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter both email and password.');
       return;
     }
     setLoading(true);
-    // Simulate API call & login
-    setTimeout(() => {
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
-      if (user) {
-        Alert.alert('Success', `Welcome back, ${user.name}!`);
-        login(user); // Call login from context to update user state
-        // No need for navigation.navigate('App') here, RootNavigator will handle the switch
+    try {
+      const success = await login(email, password);
+      if (success) {
+        Alert.alert('Success', 'Login successful!');
+        // Navigation to app routes will be handled by AuthContext effect or root layout logic
+        // router.replace('/(tabs)/home'); // This can also be triggered here if preferred
       } else {
         Alert.alert('Login Failed', 'Invalid email or password.');
       }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert('Login Error', 'An unexpected error occurred.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -65,14 +69,15 @@ const TeacherLoginScreen = ({ navigation }) => {
       >
         Login
       </Button>
-      <Button
-        mode="text"
-        onPress={() => navigation.navigate('TeacherRegister')} // Navigation to Register screen is fine
-        style={styles.button}
-        disabled={loading}
-      >
-        Don't have an account? Register
-      </Button>
+      <Link href="/auth/register" asChild>
+        <Button
+          mode="text"
+          style={styles.button}
+          disabled={loading}
+        >
+          Don't have an account? Register
+        </Button>
+      </Link>
     </View>
   );
 };
@@ -97,9 +102,4 @@ const styles = StyleSheet.create({
   },
 });
 
-// Wrap with PaperProvider if it's a standalone screen for testing,
-// but typically PaperProvider is at the root of App.js
-// export default TeacherLoginScreen;
-
-// For now, let's export directly. App.js will have the Provider.
 export default TeacherLoginScreen;

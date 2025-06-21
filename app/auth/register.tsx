@@ -1,19 +1,20 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { TextInput, Button, Text, useTheme } from 'react-native-paper';
-import { users, addTeachingRecord } from '../../data/dummyData'; // To add new user to mock data
-import { AuthContext } from '../../navigation/AuthContext'; // Import AuthContext
+import { useAuth } from '../../services/AuthContext'; // Corrected path
+import { Link, useRouter } from 'expo-router';
 
-const TeacherRegisterScreen = ({ navigation }) => {
+const TeacherRegisterScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
-  const { register } = useContext(AuthContext); // Use register from AuthContext
+  const { register } = useAuth();
+  const router = useRouter();
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields.');
       return;
@@ -28,34 +29,20 @@ const TeacherRegisterScreen = ({ navigation }) => {
     }
 
     setLoading(true);
-    // Simulate API call & registration
-    setTimeout(() => {
-      const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      if (existingUser) {
-        Alert.alert('Registration Failed', 'This email is already registered.');
-      } else {
-        const newUser = {
-          id: `user${users.length + 1}`, // simple ID
-          name,
-          email,
-          // Storing plain password in dummyData for login simulation.
-          // In a real app, hash this password before sending to a backend.
-          password: password,
-        };
-        // users.push(newUser); // Add to our mock data - AuthContext's register might handle this or a service
-        register(newUser); // Call context's register
-
-        // Add user to the dummyData.users array manually for now for persistence in this mock setup
-        // In a real app this would be handled by a backend and the context might fetch updated user list
-        if (!users.find(u => u.email === newUser.email)) {
-            users.push(newUser);
-        }
-
+    try {
+      const newUser = await register(name, email, password);
+      if (newUser) {
         Alert.alert('Success', 'Registration successful! Please login.');
-        navigation.navigate('TeacherLogin'); // Navigate to login after registration
+        router.replace('/auth/login'); // Navigate to login after registration
+      } else {
+        Alert.alert('Registration Failed', 'This email might already be registered or another error occurred.');
       }
+    } catch (error) {
+      console.error('Registration error:', error);
+      Alert.alert('Registration Error', 'An unexpected error occurred.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -109,14 +96,15 @@ const TeacherRegisterScreen = ({ navigation }) => {
       >
         Register
       </Button>
-      <Button
-        mode="text"
-        onPress={() => navigation.navigate('TeacherLogin')}
-        style={styles.button}
-        disabled={loading}
-      >
-        Already have an account? Login
-      </Button>
+      <Link href="/auth/login" asChild>
+        <Button
+          mode="text"
+          style={styles.button}
+          disabled={loading}
+        >
+          Already have an account? Login
+        </Button>
+      </Link>
     </View>
   );
 };
