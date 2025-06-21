@@ -1,20 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, FlatList, Alert, ScrollView } from 'react-native';
 import {
+  TextInput,
   Button,
+  Text,
+  useTheme,
   Card,
-  Chip,
-  IconButton,
-  Modal,
+  Title,
   Paragraph,
+  Modal,
   Portal,
   RadioButton,
-  Text,
-  TextInput,
-  Title,
-  useTheme,
+  IconButton, // Added for potential logout or other actions
 } from 'react-native-paper';
-import { addTeachingRecord, subjects as allSubjects, getRecordsForUser, Subject, TeachingRecord } from '../data/dummyData'; // Corrected path assuming data is in app/data
+import { subjects as allSubjects, teachingRecords as initialRecords, addTeachingRecord, getRecordsForUser, TeachingRecord, Subject } from '../data/dummyData'; // Corrected path assuming data is in app/data
 import { useAuth } from '../services/AuthContext'; // Corrected path
 
 const HomeScreen = () => {
@@ -129,21 +128,19 @@ const HomeScreen = () => {
 
                 <View style={styles.formSection}>
                   <Text variant="titleMedium" style={[styles.label, {color: theme.colors.onSurfaceVariant}]}>Select Subject</Text>
-                  <RadioButton.Group onValueChange={newValue => setSelectedSubjectId(newValue)} value={selectedSubjectId}>
-                    <View style={styles.radioGroupContainer}>
+                  <View style={styles.chipGroupContainer}>
                     {allSubjects.map((subject: Subject) => (
-                      <View key={subject.id} style={styles.radioButtonItemContainer}>
-                        <RadioButton.Item
-                          label={subject.name}
-                          value={subject.id}
-                          style={styles.radioButtonItem}
-                          labelStyle={{fontSize: 14}}
-                          position="leading" // Icon on the left, label on the right
-                        />
-                      </View>
+                      <Chip
+                        key={subject.id}
+                        selected={selectedSubjectId === subject.id}
+                        onPress={() => setSelectedSubjectId(subject.id)}
+                        style={[styles.subjectChip, selectedSubjectId === subject.id ? {backgroundColor: theme.colors.primaryContainer} : {}]}
+                        textStyle={[styles.subjectChipText, selectedSubjectId === subject.id ? {color: theme.colors.onPrimaryContainer} : {}]}
+                      >
+                        {subject.name}
+                      </Chip>
                     ))}
-                    </View>
-                  </RadioButton.Group>
+                  </View>
                 </View>
 
                 <View style={styles.formSection}>

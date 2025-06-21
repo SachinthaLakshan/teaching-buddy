@@ -219,15 +219,19 @@ const LessonPlansScreen = () => {
 
                 <View style={styles.formSection}>
                   <Text variant="titleMedium" style={[styles.label, {color: theme.colors.onSurfaceVariant}]}>Subject</Text>
-                  <RadioButton.Group onValueChange={newValue => setSelectedSubjectId(newValue)} value={selectedSubjectId}>
-                    <View style={styles.radioGroupContainerModal}>
+                  <View style={styles.chipGroupContainer}>
                     {allSubjects.map((subject: Subject) => (
-                       <View key={subject.id} style={styles.radioButtonItemContainerModal}>
-                        <RadioButton.Item label={subject.name} value={subject.id} style={styles.radioButtonItemModal} labelStyle={{fontSize: 14}} position="leading"/>
-                       </View>
+                      <Chip
+                        key={subject.id}
+                        selected={selectedSubjectId === subject.id}
+                        onPress={() => setSelectedSubjectId(subject.id)}
+                        style={[styles.subjectChip, selectedSubjectId === subject.id ? {backgroundColor: theme.colors.primaryContainer} : {}]}
+                        textStyle={[styles.subjectChipText, selectedSubjectId === subject.id ? {color: theme.colors.onPrimaryContainer} : {}]}
+                      >
+                        {subject.name}
+                      </Chip>
                     ))}
-                    </View>
-                  </RadioButton.Group>
+                  </View>
                 </View>
 
                 <TextInput label="Date (YYYY-MM-DD)" value={date} onChangeText={setDate} mode="outlined" style={styles.input} keyboardType="numeric" outlineStyle={{borderRadius: theme.roundness}} />

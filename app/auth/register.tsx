@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, StyleSheet, Alert, Image } from 'react-native'; // Added Image
 import { TextInput, Button, Text, useTheme } from 'react-native-paper';
-import { useAuth } from '../services/AuthContext'; // Corrected path
+import { useAuth } from '../services/AuthContext';
 import { Link, useRouter } from 'expo-router';
+
+// Assuming the logo path is correct
+const logo = require('../../assets/images/partial-react-logo.png');
 
 const TeacherRegisterScreen = () => {
   const [name, setName] = useState('');
@@ -47,6 +50,7 @@ const TeacherRegisterScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <Image source={logo} style={styles.logo} resizeMode="contain" />
       <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.primary }]}>
         Teacher Registration
       </Text>
@@ -127,6 +131,12 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingVertical: 8,
   },
+  logo: {
+    width: 150,
+    height: 100, // Adjust height as needed
+    alignSelf: 'center',
+    marginBottom: 20,
+  }
 });
 
 export default TeacherRegisterScreen;

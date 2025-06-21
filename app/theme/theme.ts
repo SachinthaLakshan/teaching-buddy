@@ -9,46 +9,51 @@ import type { Theme } from 'react-native-paper/lib/typescript/types'; // Import 
 export const appTheme: Theme = {
   ...DefaultTheme,
   colors: {
-    ...DefaultTheme.colors, // Start with defaults to ensure all keys are present
-    primary: '#5D9C9C',          // Muted Teal
-    onPrimary: '#FFFFFF',
-    primaryContainer: '#D4E9E9', // Light version of primary
-    onPrimaryContainer: '#2F4F4F', // Dark Slate Gray - for text on primaryContainer
+    ...DefaultTheme.colors,     // Start with defaults
+    primary: '#FADADD',          // Soft Pink
+    onPrimary: '#4A4A4A',        // Deep Taupe (good contrast on soft pink)
+    primaryContainer: '#F9E2E7', // Pale Rose (using Highlight for primary container)
+    onPrimaryContainer: '#4A4A4A',// Deep Taupe
 
-    secondary: '#8CBDB9',        // Lighter, softer Teal/Blue-Green
-    onSecondary: '#FFFFFF',     // White text on secondary
-    secondaryContainer: '#DAE8E7',// Light version of secondary
-    onSecondaryContainer: '#2F4F4F', // Dark Slate Gray - for text on secondaryContainer
+    secondary: '#D6A4A4',        // Dusty Rose (Accent)
+    onSecondary: '#FFFFFF',       // White (good contrast on dusty rose)
+    secondaryContainer: '#F5E3E3',// Lighter Dusty Rose
+    onSecondaryContainer: '#4A4A4A',// Deep Taupe
 
-    tertiary: '#B2D8D8',         // Very light Teal/Blue
-    onTertiary: '#343434',      // Dark text on tertiary
-    tertiaryContainer: '#E0F0F0', // Even lighter for tertiary container
-    onTertiaryContainer: '#2F4F4F',// Dark Slate Gray
+    tertiary: '#F9E2E7',         // Pale Rose (Highlight, also using for tertiary)
+    onTertiary: '#4A4A4A',       // Deep Taupe
+    tertiaryContainer: '#FFF6F8', // Very Pale Rose/Blush
+    onTertiaryContainer: '#4A4A4A',// Deep Taupe
 
-    background: '#F7F7F7',       // Very light warm gray / off-white
-    onBackground: '#343434',     // Dark gray text on background
+    background: '#FFF1F0',       // Blush White
+    onBackground: '#4A4A4A',     // Deep Taupe
 
-    surface: '#FFFFFF',          // White for cards, dialogs etc.
-    onSurface: '#343434',        // Dark gray text on surface
-    surfaceVariant: '#EEF2F2',   // Slightly off-white/light gray variant for surfaces
-    onSurfaceVariant: '#4A4A4A', // Slightly lighter dark gray for text on surfaceVariant
+    surface: '#FFF7F6',          // Slightly warmer white for surfaces (cards, dialogs)
+    onSurface: '#4A4A4A',        // Deep Taupe
+    surfaceVariant: '#F9E2E7',   // Pale Rose (can be used for variants)
+    onSurfaceVariant: '#4A4A4A', // Deep Taupe
 
-    outline: '#A0A0A0',          // Soft gray for outlines
-    outlineVariant: '#C0C0C0',   // Lighter gray for less prominent outlines
+    outline: '#D6A4A4',          // Dusty Rose (using Accent for outlines for a soft look)
+    outlineVariant: '#EBC7C7',   // Lighter Dusty Rose
 
-    error: '#B00020',            // Standard error, can be muted if desired e.g., #D32F2F
+    error: '#B00020',            // Standard error red
     onError: '#FFFFFF',
-    errorContainer: '#F9DEDC',
-    onErrorContainer: '#410E0B',
+    errorContainer: '#F9DEDC',   // Light red for error container background
+    onErrorContainer: '#410E0B', // Dark red for text on error container
 
-    // Custom semantic colors (optional, ensure your components know how to use them or augment Theme)
-    success: '#4CAF50', // Keep standard green for success
-    warning: '#FFC107', // Keep standard amber for warning
+    text: '#4A4A4A',             // Default text color (Deep Taupe)
 
-    text: '#343434', // Default text color, ensure this is set if not using onBackground/onSurface explicitly everywhere
+    // MD3 elevation colors can be kept as default or customized if needed
+    // elevation: {
+    //   ...DefaultTheme.colors.elevation,
+    //   level1: '#FFF7F6', // Example: matching surface
+    //   level2: '#F9E2E7', // Example: matching highlight/surfaceVariant
+    //   level3: '#F5D9DE', // Example: slightly darker
+    // },
 
-    // Specific MD3 roles if needed, many are derived or alias to above.
-    // elevation: DefaultTheme.colors.elevation, // Keep default elevation colors or customize
+    // Custom semantic colors (optional)
+    success: '#6B8E23', // Olive Drab (more muted green)
+    warning: '#FFA500', // Orange (standard warning)
   },
   fonts: { // Casting to any to avoid deep type mismatches if not perfectly aligning with MD3 types.
             // For precise font theming, ensure all MD3 font variants are correctly typed.
