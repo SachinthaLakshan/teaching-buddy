@@ -67,7 +67,7 @@ const MonthlyReportScreen = () => {
         <Divider style={styles.divider} />
         {subjectGroup.records.length > 0 ? (
           subjectGroup.records.map(record => (
-            <View key={record.id} style={styles.recordItemContainer}>
+            <View key={record.id} style={[styles.recordItemContainer, { borderLeftColor: theme.colors.secondary }]}>
               <Paragraph style={[styles.recordDate, {color: theme.colors.secondary}]}>
                 {new Date(record.date).toLocaleDateString()} - Period {record.period}
               </Paragraph>
@@ -94,7 +94,7 @@ const MonthlyReportScreen = () => {
           contentContainerStyle={styles.list}
         />
       ) : (
-        <Text style={styles.emptyText}>No records found for {user?.name || 'current user'} to generate reports.</Text>
+        <Text style={[styles.emptyText, { color: theme.colors.onSurfaceDisabled }]}>No records found for {user?.name || 'current user'} to generate reports.</Text>
       )}
     </View>
   );
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingLeft: 8,
     borderLeftWidth: 3,
-    borderLeftColor: theme.colors.secondary, // Use theme color
+    // borderLeftColor will be applied inline
   },
   recordDate: {
     fontWeight: 'bold',
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 30,
     fontSize: 16,
-    color: theme.colors.onSurfaceDisabled, // Use theme color
+    // color will be applied inline
   },
 });
 

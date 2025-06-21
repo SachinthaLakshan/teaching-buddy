@@ -79,7 +79,7 @@ const HomeScreen = () => {
     <Card style={styles.card}>
       <Card.Content>
         <Title style={{ color: theme.colors.primary }}>{item.subjectName} - Period {item.period}</Title>
-        <Paragraph style={styles.dateText}>Date: {new Date(item.date).toLocaleDateString()}</Paragraph>
+        <Paragraph style={[styles.dateText, { color: theme.colors.onSurfaceVariant }]}>Date: {new Date(item.date).toLocaleDateString()}</Paragraph>
         <Paragraph>{item.description}</Paragraph>
       </Card.Content>
     </Card>
@@ -105,7 +105,7 @@ const HomeScreen = () => {
         renderItem={renderRecordItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
-        ListEmptyComponent={<Text style={styles.emptyText}>No records found for {user?.name || 'current user'}. Add one!</Text>}
+        ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.colors.onSurfaceDisabled }]}>No records found for {user?.name || 'current user'}. Add one!</Text>}
       />
 
       <Portal>
@@ -225,14 +225,14 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 12,
-    color: theme.colors.onSurfaceVariant, // Use theme color
+    // color removed - will be applied inline
     marginBottom: 4,
   },
   emptyText: {
     textAlign: 'center',
     marginTop: 30,
     fontSize: 16,
-    color: theme.colors.onSurfaceDisabled, // Use theme color
+    // color removed - will be applied inline
   },
   // Modal Styles
   modalContentContainer: { // This is the style for the Modal component itself from Paper
