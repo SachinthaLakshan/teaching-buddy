@@ -14,32 +14,37 @@ import {
   Title,
   useTheme,
 } from 'react-native-paper';
-import { addTeachingRecord, subjects as allSubjects, getRecordsForUser, Subject, TeachingRecord } from '../data/dummyData'; // Corrected path assuming data is in app/data
-import { useAuth } from '../services/AuthContext'; // Corrected path
+import { useAuth } from '../services/AuthContext';
+const BASE_URL = 'https://teach-buddy-be.vercel.app';
 
 const HomeScreen = () => {
   const theme = useTheme();
-  const { user, logout } = useAuth(); // Get current user
-  const [records, setRecords] = useState<TeachingRecord[]>([]);
+  const { user } = useAuth();
+  const [records, setRecords] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const screenHeight = Dimensions.get('window').height;
 
   // Form state
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
-  const [selectedPeriod, setSelectedPeriod] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [formError, setFormError] = useState<string>('');
+  const [selectedSubjectId, setSelectedSubjectId] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState('');
+  const [description, setDescription] = useState('');
+  const [formError, setFormError] = useState('');
 
-  const periods: number[] = [1, 2, 3, 4, 5, 6, 7, 8];
+  const periods = [1, 2, 3, 4, 5, 6, 7, 8];
 
   useEffect(() => {
+    fetch(`${BASE_URL}/api/subjects`).then(res => res.json()).then(setSubjects).catch(console.error);
     if (user) {
-      const userRecords = getRecordsForUser(user.id).sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || b.period - a.period
-      );
-      setRecords(userRecords);
+      fetch(`${BASE_URL}/api/teaching-records/user/${user.id}`).then(res => res.json()).then(setRecords).catch(console.error);
     }
-  }, [user]); // Reload records if user changes or on initial load for the user
+  }, [user]);
+
+  const refreshRecords = () => {
+    if (user) {
+      fetch(`${BASE_URL}/api/teaching-records/user/${user.id}`).then(res => res.json()).then(setRecords).catch(console.error);
+    }
+  };
 
   const showModal = () => setModalVisible(true);
   const hideModal = () => {
@@ -50,7 +55,7 @@ const HomeScreen = () => {
     setFormError('');
   };
 
-  const handleAddRecord = () => {
+  const handleAddRecord = async () => {
     if (!selectedSubjectId || !selectedPeriod || !description.trim()) {
       setFormError('All fields are required.');
       return;
@@ -60,24 +65,28 @@ const HomeScreen = () => {
       return;
     }
     setFormError('');
-
-    const newRecordData = {
-      userId: user.id,
-      date: new Date().toISOString().split('T')[0], // Today's date
-      period: parseInt(selectedPeriod, 10),
-      subjectId: selectedSubjectId,
-      description: description.trim(),
-    };
-
-    const addedRecord = addTeachingRecord(newRecordData);
-    setRecords(prevRecords => [addedRecord, ...prevRecords].sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime() || b.period - a.period
-    ));
-    hideModal();
-    Alert.alert('Success', 'Teaching record added successfully.');
+    try {
+      await fetch(`${BASE_URL}/api/teaching-records`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          date: new Date().toISOString().split('T')[0],
+          period: parseInt(selectedPeriod, 10),
+          subjectId: selectedSubjectId,
+          description: description.trim(),
+        }),
+      });
+      hideModal();
+      refreshRecords();
+      Alert.alert('Success', 'Teaching record added successfully.');
+    } catch (e) {
+      const err = e as Error;
+      Alert.alert('Error', err.message || 'Failed to add record');
+    }
   };
 
-  const renderRecordItem = ({ item }: { item: TeachingRecord }) => (
+  const renderRecordItem = ({ item }: { item: any }) => (
     <Card style={styles.card}>
       <Card.Content>
         <Title style={{ color: theme.colors.primary }}>{item.subjectName} - Period {item.period}</Title>
@@ -130,7 +139,7 @@ const HomeScreen = () => {
                 <View style={styles.formSection}>
                   <Text variant="titleMedium" style={[styles.label, {color: theme.colors.onSurfaceVariant}]}>Select Subject</Text>
                   <View style={styles.chipGroupContainer}>
-                    {allSubjects.map((subject: Subject) => (
+                    {subjects.map((subject: any) => (
                       <Chip
                         key={subject.id}
                         selected={selectedSubjectId === subject.id}

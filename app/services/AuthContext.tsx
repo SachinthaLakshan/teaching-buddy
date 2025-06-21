@@ -1,19 +1,27 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
-import { User, findUserByEmail, addUser as addNewUserToDB } from '../data/dummyData'; // Using dummyData
-import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
+import { useRootNavigationState, useRouter, useSegments } from 'expo-router';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+
+const BASE_URL = 'https://teach-buddy-be.vercel.app';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+}
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password_provided: string) => Promise<boolean>;
+  token: string | null;
+  signin: (email: string, password: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
-  register: (name: string, email: string, password_provided: string) => Promise<User | null>;
-  isLoading: boolean; // To indicate if auth state is being determined
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true); // Start with loading true
 
   const router = useRouter();
@@ -51,68 +59,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
 
-  const login = async (email: string, password_provided: string): Promise<boolean> => {
-    setIsLoading(true);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const foundUser = findUserByEmail(email);
-        if (foundUser && foundUser.password === password_provided) {
-          setUser(foundUser);
-          setIsLoading(false);
-          // router.replace('/(tabs)/home'); // Navigation handled by useEffect
-          resolve(true);
-        } else {
-          setUser(null);
-          setIsLoading(false);
-          resolve(false);
-        }
-      }, 500); // Simulate API delay
+  const signin = async (email: string, password: string) => {
+    const res = await fetch(`${BASE_URL}/api/users/signin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
     });
+    if (!res.ok) {
+      throw new Error('Invalid credentials');
+    }
+    const data = await res.json();
+    setUser(data.user);
+    setToken(data.token);
   };
 
-  const register = async (name: string, email: string, password_provided: string): Promise<User | null> => {
-    setIsLoading(true);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const existingUser = findUserByEmail(email);
-        if (existingUser) {
-          setIsLoading(false);
-          resolve(null); // User already exists
-          return;
-        }
-        const newUser: User = { id: '', name, email, password: password_provided }; // ID will be set by addUser
-        const addedUser = addNewUserToDB(newUser);
-        setIsLoading(false);
-        // Don't setUser here, user should login after registration
-        // router.replace('/auth/login'); // Navigation handled by screen
-        resolve(addedUser);
-      }, 500);
+  const signup = async (email: string, password: string, name: string) => {
+    const res = await fetch(`${BASE_URL}/api/users/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name }),
     });
+    if (res.status === 409) {
+      throw new Error('User already exists');
+    }
+    if (!res.ok) {
+      throw new Error('Signup failed');
+    }
+    // Optionally auto-login after signup
+    await signin(email, password);
   };
 
-  const logout = async () => {
-    setIsLoading(true);
-    // Simulate logout process
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        setUser(null);
-        setIsLoading(false);
-        // router.replace('/auth/login'); // Navigation handled by useEffect
-        resolve();
-      }, 300);
-    });
+  const logout = () => {
+    setUser(null);
+    setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, isLoading }}>
+    <AuthContext.Provider value={{ user, token, signin, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

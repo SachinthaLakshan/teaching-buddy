@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Alert, Image } from 'react-native'; // Added Image
-import { TextInput, Button, Text, useTheme } from 'react-native-paper';
-import { useAuth } from '../services/AuthContext';
 import { Link, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Image, StyleSheet, View } from 'react-native'; // Added Image
+import { Button, Text, TextInput, useTheme } from 'react-native-paper';
+import { useAuth } from '../services/AuthContext';
 
 // Assuming the logo path is correct relative to the project root for the 'require'
 const logo = require('../../assets/images/partial-react-logo.png');
@@ -12,7 +12,7 @@ const TeacherLoginScreen = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
-  const { login } = useAuth();
+  const { signin } = useAuth();
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -22,7 +22,7 @@ const TeacherLoginScreen = () => {
     }
     setLoading(true);
     try {
-      const success = await login(email, password);
+      const success :any = await signin(email, password);
       if (success) {
         Alert.alert('Success', 'Login successful!');
         // Navigation to app routes will be handled by AuthContext effect or root layout logic

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Alert, Image } from 'react-native'; // Added Image
-import { TextInput, Button, Text, useTheme } from 'react-native-paper';
-import { useAuth } from '../services/AuthContext';
 import { Link, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { Alert, Image, StyleSheet, View } from 'react-native'; // Added Image
+import { Button, Text, TextInput, useTheme } from 'react-native-paper';
+import { useAuth } from '../services/AuthContext';
 
 // Assuming the logo path is correct
 const logo = require('../../assets/images/partial-react-logo.png');
@@ -14,7 +14,7 @@ const TeacherRegisterScreen = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
-  const { register } = useAuth();
+  const { signup } = useAuth();
   const router = useRouter();
 
   const handleRegister = async () => {
@@ -33,7 +33,7 @@ const TeacherRegisterScreen = () => {
 
     setLoading(true);
     try {
-      const newUser = await register(name, email, password);
+      const newUser:any = await signup( email, password, name);
       if (newUser) {
         Alert.alert('Success', 'Registration successful! Please login.');
         router.replace('/auth/login'); // Navigate to login after registration

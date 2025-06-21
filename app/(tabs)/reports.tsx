@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, Alert } from 'react-native';
-import { Text, useTheme, Card, Title, Paragraph, Button, Divider } from 'react-native-paper';
-import { getRecordsForUser, TeachingRecord } from '../data/dummyData'; // Corrected path
-import { useAuth } from '../services/AuthContext'; // Corrected path
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Button, Card, Divider, Paragraph, Text, Title, useTheme } from 'react-native-paper';
+import { useAuth } from '../services/AuthContext';
+const BASE_URL = 'https://teach-buddy-be.vercel.app';
 
 interface GroupedRecord {
   subjectId: string;
@@ -14,11 +14,20 @@ const MonthlyReportScreen = () => {
   const theme = useTheme();
   const { user } = useAuth();
   const [groupedRecords, setGroupedRecords] = useState<GroupedRecord[]>([]);
+  const [records, setRecords] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
-      const records = getRecordsForUser(user.id);
-      const grouped = records.reduce<GroupedRecord[]>((acc, record) => {
+      fetch(`${BASE_URL}/api/teaching-records/user/${user.id}`)
+        .then(res => res.json())
+        .then(setRecords)
+        .catch(console.error);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      const grouped = records.reduce<GroupedRecord[]>((acc: GroupedRecord[], record: any) => {
         const subjectGroup = acc.find(s => s.subjectId === record.subjectId);
         if (subjectGroup) {
           subjectGroup.records.push(record);
@@ -39,7 +48,7 @@ const MonthlyReportScreen = () => {
 
       setGroupedRecords(grouped);
     }
-  }, [user]);
+  }, [user, records]);
 
   const handleDownloadPdf = (subjectName: string) => {
     Alert.alert(

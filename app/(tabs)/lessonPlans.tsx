@@ -13,42 +13,43 @@ import {
   TextInput,
   useTheme
 } from 'react-native-paper';
-import {
-  addLessonPlan,
-  subjects as allSubjects,
-  getLessonPlansForUser,
-  LessonPlan, // Re-use subjects from dummyData
-  Subject,
-} from '../data/dummyData';
 import { useAuth } from '../services/AuthContext';
+const BASE_URL = 'https://teach-buddy-be.vercel.app';
 
 const LessonPlansScreen = () => {
   const theme = useTheme();
   const { user } = useAuth();
   const screenHeight = Dimensions.get('window').height;
-  const [lessonPlans, setLessonPlans] = useState<LessonPlan[]>([]);
+  const [lessonPlans, setLessonPlans] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
   // Form state for new lesson plan
   const [title, setTitle] = useState('');
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); // Default to today
-  const [objectives, setObjectives] = useState<string[]>(['']); // Start with one empty objective
-  const [activities, setActivities] = useState<string[]>(['']); // Start with one empty activity
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [objectives, setObjectives] = useState(['']);
+  const [activities, setActivities] = useState(['']);
   const [assessment, setAssessment] = useState('');
   const [notes, setNotes] = useState('');
   const [formError, setFormError] = useState('');
 
   useEffect(() => {
+    fetch(`${BASE_URL}/api/subjects`).then(res => res.json()).then(setSubjects).catch(console.error);
     if (user) {
-      setLessonPlans(getLessonPlansForUser(user.id));
+      fetch(`${BASE_URL}/api/lesson-plans/user/${user.id}`).then(res => res.json()).then(setLessonPlans).catch(console.error);
     }
   }, [user]);
+
+  const refreshLessonPlans = () => {
+    if (user) {
+      fetch(`${BASE_URL}/api/lesson-plans/user/${user.id}`).then(res => res.json()).then(setLessonPlans).catch(console.error);
+    }
+  };
 
   const showModal = () => setModalVisible(true);
   const hideModal = () => {
     setModalVisible(false);
-    // Reset form
     setTitle('');
     setSelectedSubjectId('');
     setDate(new Date().toISOString().split('T')[0]);
@@ -88,40 +89,45 @@ const LessonPlansScreen = () => {
     }
   };
 
-
-  const handleAddLessonPlan = () => {
+  const handleAddLessonPlan = async () => {
     if (!title.trim() || !selectedSubjectId || !date) {
       setFormError('Title, Subject, and Date are required.');
       return;
     }
     if (objectives.some(obj => !obj.trim()) || activities.some(act => !act.trim()) || !assessment.trim()) {
-        setFormError('Objectives, Activities, and Assessment cannot be empty.');
-        return;
+      setFormError('Objectives, Activities, and Assessment cannot be empty.');
+      return;
     }
     if (!user) {
       Alert.alert("Error", "You must be logged in.");
       return;
     }
     setFormError('');
-
-    const newPlan: Omit<LessonPlan, 'id' | 'subjectName'> = {
-      userId: user.id,
-      title: title.trim(),
-      subjectId: selectedSubjectId,
-      date,
-      objectives: objectives.map(o => o.trim()).filter(o => o), // Clean and filter empty
-      activities: activities.map(a => a.trim()).filter(a => a), // Clean and filter empty
-      assessment: assessment.trim(),
-      notes: notes.trim(),
-    };
-
-    const added = addLessonPlan(newPlan);
-    setLessonPlans(prev => [added, ...prev].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    hideModal();
-    Alert.alert('Success', 'Lesson plan added successfully.');
+    try {
+      await fetch(`${BASE_URL}/api/lesson-plans`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          title: title.trim(),
+          subjectId: selectedSubjectId,
+          date,
+          objectives: objectives.map(o => o.trim()).filter(o => o),
+          activities: activities.map(a => a.trim()).filter(a => a),
+          assessment: assessment.trim(),
+          notes: notes.trim(),
+        }),
+      });
+      hideModal();
+      refreshLessonPlans();
+      Alert.alert('Success', 'Lesson plan added successfully.');
+    } catch (e) {
+      const err = e as Error;
+      Alert.alert('Error', err.message || 'Failed to add lesson plan');
+    }
   };
 
-  const renderLessonPlanItem = ({ item }: { item: LessonPlan }) => (
+  const renderLessonPlanItem = ({ item }: { item: any }) => (
     <Card style={styles.card}>
       <Card.Title
         title={item.title}
@@ -132,10 +138,10 @@ const LessonPlansScreen = () => {
       <Card.Content>
         <List.Section>
           <List.Subheader style={{color: theme.colors.secondary}}>Objectives</List.Subheader>
-          {item.objectives.map((obj, i) => <List.Item key={`obj-${i}`} title={obj} titleNumberOfLines={3} left={() => <List.Icon icon="check-circle-outline" color={theme.colors.secondary}/>} style={styles.listItem} titleStyle={styles.listItemText}/>)}
+          {item.objectives.map((obj: any, i: number) => <List.Item key={`obj-${i}`} title={obj} titleNumberOfLines={3} left={() => <List.Icon icon="check-circle-outline" color={theme.colors.secondary}/>} style={styles.listItem} titleStyle={styles.listItemText}/>)}
 
           <List.Subheader style={{color: theme.colors.secondary, marginTop: 8}}>Activities</List.Subheader>
-          {item.activities.map((act, i) => <List.Item key={`act-${i}`} title={act} titleNumberOfLines={3} left={() => <List.Icon icon="run" color={theme.colors.secondary}/>} style={styles.listItem} titleStyle={styles.listItemText}/>)}
+          {item.activities.map((act: any, i: number) => <List.Item key={`act-${i}`} title={act} titleNumberOfLines={3} left={() => <List.Icon icon="run" color={theme.colors.secondary}/>} style={styles.listItem} titleStyle={styles.listItemText}/>)}
 
           <List.Subheader style={{color: theme.colors.secondary, marginTop: 8}}>Assessment</List.Subheader>
           <Paragraph style={[styles.paragraphContent, {color: theme.colors.onSurfaceVariant}]}>{item.assessment}</Paragraph>
@@ -219,7 +225,7 @@ const LessonPlansScreen = () => {
                 <View style={styles.formSection}>
                   <Text variant="titleMedium" style={[styles.label, {color: theme.colors.onSurfaceVariant}]}>Subject</Text>
                   <View style={styles.chipGroupContainer}>
-                    {allSubjects.map((subject: Subject) => (
+                    {subjects.map((subject: any) => (
                       <Chip
                         key={subject.id}
                         selected={selectedSubjectId === subject.id}
