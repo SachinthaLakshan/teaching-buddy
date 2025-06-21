@@ -4,8 +4,8 @@ import { Stack, SplashScreen, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { PaperProvider } from 'react-native-paper';
-import { AuthProvider, useAuth } from '../services/AuthContext'; // Corrected path
-import { appTheme } from '../theme/theme'; // Corrected path
+import { AuthProvider, useAuth } from './services/AuthContext'; // Corrected path
+import { appTheme } from './theme/theme'; // Corrected path
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
 // Keep the splash screen visible while we fetch resources

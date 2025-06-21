@@ -14,7 +14,7 @@ import {
   IconButton, // Added for potential logout or other actions
 } from 'react-native-paper';
 import { subjects as allSubjects, teachingRecords as initialRecords, addTeachingRecord, getRecordsForUser, TeachingRecord, Subject } from '../data/dummyData'; // Corrected path assuming data is in app/data
-import { useAuth } from '../../services/AuthContext'; // Corrected path
+import { useAuth } from '../services/AuthContext'; // Corrected path
 
 const HomeScreen = () => {
   const theme = useTheme();

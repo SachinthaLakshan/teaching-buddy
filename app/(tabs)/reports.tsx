@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, Alert } from 'react-native';
 import { Text, useTheme, Card, Title, Paragraph, Button, Divider } from 'react-native-paper';
 import { getRecordsForUser, TeachingRecord } from '../data/dummyData'; // Corrected path
-import { useAuth } from '../../services/AuthContext'; // Corrected path
+import { useAuth } from '../services/AuthContext'; // Corrected path
 
 interface GroupedRecord {
   subjectId: string;

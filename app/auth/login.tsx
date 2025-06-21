@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { TextInput, Button, Text, useTheme } from 'react-native-paper';
-import { useAuth } from '../../services/AuthContext'; // Corrected path
+import { useAuth } from '../services/AuthContext'; // Corrected path
 import { Link, useRouter } from 'expo-router';
 
 const TeacherLoginScreen = () => {
