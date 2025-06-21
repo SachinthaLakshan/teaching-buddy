@@ -9,29 +9,46 @@ import type { Theme } from 'react-native-paper/lib/typescript/types'; // Import 
 export const appTheme: Theme = {
   ...DefaultTheme,
   colors: {
-    ...DefaultTheme.colors,
-    primary: '#6200EE', // A vibrant purple
-    // accent: '#03DAC6',   // MD3 uses 'secondary' and 'tertiary' more than 'accent'
-    secondary: '#03DAC6', // Teal accent, can be used as secondary
-    tertiary: '#018786',  // A darker teal, can be used as tertiary
-    background: '#F6F6F6', // Light grey background
-    surface: '#FFFFFF', // White surface for cards, dialogs
-    text: '#000000', // Ensure text is defined, though DefaultTheme has it
+    ...DefaultTheme.colors, // Start with defaults to ensure all keys are present
+    primary: '#5D9C9C',          // Muted Teal
     onPrimary: '#FFFFFF',
-    onSecondary: '#000000', // Text on secondary color
-    onTertiary: '#FFFFFF',
-    onBackground: '#000000',
-    onSurface: '#000000',
-    error: '#B00020',
+    primaryContainer: '#D4E9E9', // Light version of primary
+    onPrimaryContainer: '#2F4F4F', // Dark Slate Gray - for text on primaryContainer
+
+    secondary: '#8CBDB9',        // Lighter, softer Teal/Blue-Green
+    onSecondary: '#FFFFFF',     // White text on secondary
+    secondaryContainer: '#DAE8E7',// Light version of secondary
+    onSecondaryContainer: '#2F4F4F', // Dark Slate Gray - for text on secondaryContainer
+
+    tertiary: '#B2D8D8',         // Very light Teal/Blue
+    onTertiary: '#343434',      // Dark text on tertiary
+    tertiaryContainer: '#E0F0F0', // Even lighter for tertiary container
+    onTertiaryContainer: '#2F4F4F',// Dark Slate Gray
+
+    background: '#F7F7F7',       // Very light warm gray / off-white
+    onBackground: '#343434',     // Dark gray text on background
+
+    surface: '#FFFFFF',          // White for cards, dialogs etc.
+    onSurface: '#343434',        // Dark gray text on surface
+    surfaceVariant: '#EEF2F2',   // Slightly off-white/light gray variant for surfaces
+    onSurfaceVariant: '#4A4A4A', // Slightly lighter dark gray for text on surfaceVariant
+
+    outline: '#A0A0A0',          // Soft gray for outlines
+    outlineVariant: '#C0C0C0',   // Lighter gray for less prominent outlines
+
+    error: '#B00020',            // Standard error, can be muted if desired e.g., #D32F2F
+    onError: '#FFFFFF',
+    errorContainer: '#F9DEDC',
+    onErrorContainer: '#410E0B',
+
     // Custom semantic colors (optional, ensure your components know how to use them or augment Theme)
-    success: '#4CAF50',
-    warning: '#FFC107',
-    // variants
-    primaryContainer: '#EADDFF', // Light primary for containers
-    secondaryContainer: '#CCF8F2', // Light secondary for containers
-    tertiaryContainer: '#Bdedea',
-    surfaceVariant: '#ECECEC', // Slightly different surface
-    outline: '#79747E',
+    success: '#4CAF50', // Keep standard green for success
+    warning: '#FFC107', // Keep standard amber for warning
+
+    text: '#343434', // Default text color, ensure this is set if not using onBackground/onSurface explicitly everywhere
+
+    // Specific MD3 roles if needed, many are derived or alias to above.
+    // elevation: DefaultTheme.colors.elevation, // Keep default elevation colors or customize
   },
   fonts: { // Casting to any to avoid deep type mismatches if not perfectly aligning with MD3 types.
             // For precise font theming, ensure all MD3 font variants are correctly typed.

@@ -34,6 +34,8 @@ export default function TabLayout() {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'reports') {
             iconName = focused ? 'file-chart' : 'file-chart-outline';
+          } else if (route.name === 'lessonPlans') {
+            iconName = focused ? 'notebook-edit' : 'notebook-edit-outline'; // Icon for Lesson Plans
           }
           // It's important that MaterialCommunityIcons is available.
           // @expo/vector-icons should provide it.
@@ -59,6 +61,12 @@ export default function TabLayout() {
         options={{
           title: 'Monthly Reports',
           // tabBarIcon is handled by screenOptions
+        }}
+      />
+      <Tabs.Screen
+        name="lessonPlans" // This should match the filename app/(tabs)/lessonPlans.tsx
+        options={{
+          title: 'Lesson Plans',
         }}
       />
     </Tabs>

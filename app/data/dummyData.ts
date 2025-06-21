@@ -102,3 +102,77 @@ export const addUser = (newUser: User): User | null => {
   users.push(userWithId);
   return userWithId;
 };
+
+// --- Lesson Plan Data Structures and Functions ---
+
+export interface LessonPlan {
+  id: string;
+  userId: string;
+  title: string;
+  subjectId: string;
+  subjectName: string;
+  date: string; // YYYY-MM-DD, or a general creation/target date
+  objectives: string[];
+  activities: string[];
+  assessment: string;
+  notes?: string; // Optional field for additional notes
+}
+
+let lessonPlansDB: LessonPlan[] = [
+  {
+    id: 'lp1',
+    userId: '1',
+    title: 'Introduction to Algebra',
+    subjectId: 'sub1',
+    subjectName: 'Mathematics',
+    date: '2024-08-01',
+    objectives: [
+      'Understand the concept of variables.',
+      'Form simple algebraic expressions.',
+      'Solve basic linear equations with one variable.',
+    ],
+    activities: [
+      'Lecture and examples (15 mins)',
+      'Group work: Translating word problems to expressions (20 mins)',
+      'Individual practice: Solving equations worksheet (15 mins)',
+    ],
+    assessment: 'Completion of worksheet problems. Observation during group work.',
+    notes: 'Ensure to have enough manipulatives for visual learners during group work.'
+  },
+  {
+    id: 'lp2',
+    userId: '1',
+    title: 'The Solar System',
+    subjectId: 'sub2',
+    subjectName: 'Science',
+    date: '2024-08-05',
+    objectives: [
+      'Identify the planets in our solar system.',
+      'Describe key characteristics of each planet.',
+      'Understand the concept of orbits.',
+    ],
+    activities: [
+      'Video: Journey through the Solar System (10 mins)',
+      'Interactive model building (25 mins)',
+      'Planet facts matching game (15 mins)',
+    ],
+    assessment: 'Quiz on planet names and one key fact. Participation in model building.',
+  },
+];
+
+export const getLessonPlansForUser = (userId: string): LessonPlan[] => {
+  return lessonPlansDB.filter(lp => lp.userId === userId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
+export const addLessonPlan = (newPlanData: Omit<LessonPlan, 'id' | 'subjectName'>): LessonPlan => {
+  const subject = subjects.find(s => s.id === newPlanData.subjectId);
+  const plan: LessonPlan = {
+    id: `lp${lessonPlansDB.length + 1 + Date.now()}`, // More unique ID
+    ...newPlanData,
+    subjectName: subject?.name || 'Unknown Subject',
+  };
+  lessonPlansDB.push(plan);
+  // Sort again if maintaining a specific order in the DB array is important
+  lessonPlansDB.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return plan;
+};

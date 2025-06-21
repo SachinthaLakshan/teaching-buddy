@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingLeft: 8,
     borderLeftWidth: 3,
-    borderLeftColor: '#03DAC6', // Accent color from theme (secondary)
+    borderLeftColor: theme.colors.secondary, // Use theme color
   },
   recordDate: {
     fontWeight: 'bold',
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 30,
     fontSize: 16,
-    color: 'grey',
+    color: theme.colors.onSurfaceDisabled, // Use theme color
   },
 });
 
