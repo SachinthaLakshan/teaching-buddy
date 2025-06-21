@@ -1,45 +1,69 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Tabs } from 'expo-router';
+import { useTheme } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+// Import Text from react-native-paper if you want to use its theming for labels more directly,
+// or rely on tintColor passed by the navigator.
+// import { Text as PaperText } from 'react-native-paper';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const theme = useTheme(); // Using react-native-paper theme
 
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.onSurfaceDisabled, // A more muted color for inactive tabs
+        // headerShown: true, // We can show headers per tab screen if needed
+        headerStyle: {
+          backgroundColor: theme.colors.primary,
+        },
+        headerTintColor: theme.colors.onPrimary,
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        tabBarStyle: {
+          backgroundColor: theme.colors.elevation.level2, // Or theme.colors.surface for a flatter look
+          borderTopColor: theme.colors.outlineVariant, // Subtle top border
+          borderTopWidth: StyleSheet.hairlineWidth, // Use StyleSheet for hairlineWidth
+        },
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName: string = '';
+
+          if (route.name === 'home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'reports') {
+            iconName = focused ? 'file-chart' : 'file-chart-outline';
+          }
+          // It's important that MaterialCommunityIcons is available.
+          // @expo/vector-icons should provide it.
+          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+        },
+        // Example for custom label styling with PaperText:
+        // tabBarLabel: ({ focused, color }) => (
+        //   <PaperText style={{ color, fontSize: 10, marginBottom: 2, fontFamily: theme.fonts.labelSmall.fontFamily }}>
+        //     {route.name.charAt(0).toUpperCase() + route.name.slice(1)}
+        //   </PaperText>
+        // ),
+      })}
+    >
       <Tabs.Screen
-        name="index"
+        name="home" // This should match the filename app/(tabs)/home.tsx
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: 'Daily Records',
+          // tabBarIcon is handled by screenOptions, but can be overridden here
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="reports" // This should match the filename app/(tabs)/reports.tsx
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Monthly Reports',
+          // tabBarIcon is handled by screenOptions
         }}
       />
     </Tabs>
   );
 }
+
+// Need to import StyleSheet for hairlineWidth
+import { StyleSheet } from 'react-native';
