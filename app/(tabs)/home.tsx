@@ -118,7 +118,7 @@ const HomeScreen = () => {
         >
           <Card style={[styles.modalCard, { maxHeight: screenHeight * 0.92 }]}>
             <Card.Title
-              title="Add New Teaching Record"
+              title="Add New Record"
               titleVariant="headlineSmall"
               titleStyle={{color: theme.colors.primary, textAlign: 'center'}}
               right={(props) => <IconButton {...props} icon="close-circle-outline" onPress={hideModal} />}
