@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRootNavigationState, useRouter, useSegments } from 'expo-router';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
@@ -30,12 +31,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigationState = useRootNavigationState();
 
   useEffect(() => {
-    // Simulate checking for a stored session on app startup
+    // Restore user and token from AsyncStorage on app startup
     const checkUserSession = async () => {
       setIsLoading(true);
-      // In a real app, you'd check AsyncStorage or secure store here
-      // For now, assume no user is logged in initially
-      setUser(null);
+      try {
+        const storedUser = await AsyncStorage.getItem('user');
+        const storedToken = await AsyncStorage.getItem('token');
+        if (storedUser && storedToken) {
+          setUser(JSON.parse(storedUser));
+          setToken(storedToken);
+        } else {
+          setUser(null);
+          setToken(null);
+        }
+      } catch (e) {
+        setUser(null);
+        setToken(null);
+      }
       setIsLoading(false);
     };
     checkUserSession();
@@ -55,6 +67,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const data = await res.json();
     setUser(data.user);
     setToken(data.token);
+    await AsyncStorage.setItem('user', JSON.stringify(data.user));
+    await AsyncStorage.setItem('token', data.token);
   };
 
   const signup = async (email: string, password: string, name: string) => {
@@ -75,9 +89,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await signin(email, password);
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     setToken(null);
+    await AsyncStorage.removeItem('user');
+    await AsyncStorage.removeItem('token');
   };
 
   return (

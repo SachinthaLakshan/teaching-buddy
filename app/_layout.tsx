@@ -32,8 +32,15 @@ const InitialLayout = () => {
 
     const inAuthGroup = segments[0] === 'auth';
     const isRegister = inAuthGroup && segments[1] === 'register';
+    const isRoot = Number(segments.length) === 0;
 
-    if (!user && !inAuthGroup && !isRegister) {
+    if (isRoot) {
+      if (user) {
+        router.replace('/(tabs)/home');
+      } else {
+        router.replace('/auth/login');
+      }
+    } else if (!user && !inAuthGroup && !isRegister) {
       router.replace('/auth/login');
     } else if (user && inAuthGroup) {
       router.replace('/(tabs)/home');
