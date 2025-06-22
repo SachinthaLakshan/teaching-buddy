@@ -99,15 +99,23 @@ const MonthlyReportScreen = () => {
       }
 
       const filePath = await generateReportPdf(reportData);
-      await Sharing.shareAsync(filePath, {
-        mimeType: 'application/pdf',
-        dialogTitle: `Share ${subjectGroup.subjectName} Report`,
-        UTI: 'com.adobe.pdf',
-      });
+
+      if (filePath) { // Only proceed if filePath is not null
+        await Sharing.shareAsync(filePath, {
+          mimeType: 'application/pdf',
+          dialogTitle: `Share ${subjectGroup.subjectName} Report`,
+          UTI: 'com.adobe.pdf',
+        });
+      }
+      // If filePath is null, an Alert has already been shown by generateReportPdf,
+      // or by the platform/module availability checks.
 
     } catch (error) {
-      console.error('Failed to generate or share PDF:', error);
-      Alert.alert('Error', `Failed to generate or share PDF. ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // This catch block might now be less likely to be hit for PDF generation errors
+      // as they are caught inside generateReportPdf, but good to keep for other unexpected errors
+      // or issues with Sharing.isAvailableAsync() itself.
+      console.error('Unhandled error in handleDownloadPdf:', error);
+      Alert.alert('Operation Failed', `An unexpected error occurred. ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsGeneratingPdf(null); // Clear loading state
     }

@@ -1,3 +1,4 @@
+import { Platform, Alert } from 'react-native';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 
 export interface ReportDataRecord {
@@ -100,7 +101,25 @@ const generateHtmlContent = (data: ReportData): string => {
   `;
 };
 
-export const generateReportPdf = async (data: ReportData): Promise<string> => {
+export const generateReportPdf = async (data: ReportData): Promise<string | null> => {
+  if (Platform.OS === 'web') {
+    Alert.alert(
+      'Unsupported Feature',
+      'PDF generation is not supported on the web platform. Please use a mobile device (iOS or Android).'
+    );
+    return null;
+  }
+
+  // Check if RNHTMLtoPDF and its convert method are available (for native platforms)
+  if (!RNHTMLtoPDF || typeof RNHTMLtoPDF.convert !== 'function') {
+    console.error('RNHTMLtoPDF module is not correctly linked or available.');
+    Alert.alert(
+      'Error',
+      'PDF generation module is not available. This feature may not work in Expo Go. Try using a development build.'
+    );
+    return null;
+  }
+
   const htmlContent = generateHtmlContent(data);
   const options = {
     html: htmlContent,
@@ -111,12 +130,14 @@ export const generateReportPdf = async (data: ReportData): Promise<string> => {
   try {
     const file = await RNHTMLtoPDF.convert(options);
     if (!file.filePath) {
+       console.error('PDF generation failed, filePath is missing from response:', file);
       throw new Error('PDF generation failed, filePath is missing.');
     }
     console.log('PDF generated at:', file.filePath);
     return file.filePath;
   } catch (error) {
     console.error('Error generating PDF:', error);
-    throw error; // Re-throw the error to be handled by the caller
+     Alert.alert('PDF Generation Error', `An error occurred while generating the PDF: ${error instanceof Error ? error.message : String(error)}`);
+     return null; // Return null instead of throwing to allow for specific UI handling
   }
 };
