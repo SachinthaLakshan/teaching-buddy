@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Alert, Dimensions, FlatList, ScrollView, StyleSheet, View } from 'react-native';
 import {
   Button,
@@ -19,7 +20,8 @@ const BASE_URL = 'https://teach-buddy-be.vercel.app';
 
 const HomeScreen = () => {
   const theme = useTheme();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigation = useNavigation();
   const [records, setRecords] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -42,6 +44,14 @@ const HomeScreen = () => {
       fetch(`${BASE_URL}/api/teaching-records/user/${user.id}`).then(res => res.json()).then(setRecords).catch(console.error);
     }
   }, [user]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <IconButton icon="logout" onPress={logout} accessibilityLabel="Logout" />
+      ),
+    });
+  }, [logout, navigation]);
 
   const refreshRecords = () => {
     if (user) {
@@ -105,10 +115,7 @@ const HomeScreen = () => {
         <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.primary }]}>
           Daily Records
         </Text>
-        {/* Optional: Logout button or user display */}
-        {/* <IconButton icon="logout" onPress={logout} /> */}
       </View>
-
 
       <Button icon="plus-circle" mode="contained" onPress={showModal} style={styles.addButton}>
         Add New Record

@@ -227,11 +227,11 @@ const LessonPlansScreen = () => {
                   <View style={styles.chipGroupContainer}>
                     {subjects.map((subject: any) => (
                       <Chip
-                        key={subject.id}
-                        selected={selectedSubjectId === subject.id}
-                        onPress={() => setSelectedSubjectId(subject.id)}
-                        style={[styles.subjectChip, selectedSubjectId === subject.id ? {backgroundColor: theme.colors.primaryContainer} : {}]}
-                        textStyle={[styles.subjectChipText, selectedSubjectId === subject.id ? {color: theme.colors.onPrimaryContainer} : {}]}
+                        key={subject._id}
+                        selected={selectedSubjectId === subject._id}
+                        onPress={() => setSelectedSubjectId(subject._id)}
+                        style={[styles.subjectChip, selectedSubjectId === subject._id ? {backgroundColor: theme.colors.primaryContainer} : {}]}
+                        textStyle={[styles.subjectChipText, selectedSubjectId === subject._id ? {color: theme.colors.onPrimaryContainer} : {}]}
                       >
                         {subject.name}
                       </Chip>

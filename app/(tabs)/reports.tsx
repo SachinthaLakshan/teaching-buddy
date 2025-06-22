@@ -50,10 +50,15 @@ const MonthlyReportScreen = () => {
     }
   }, [user, records]);
 
-  const handleDownloadPdf = (subjectName: string) => {
+  const handleDownloadPdf = (subjectId: string) => {
+    const group = groupedRecords.find(g => g.subjectId === subjectId);
+    if (group) {
+    
+    }
+    
     Alert.alert(
       'Download PDF',
-      `Simulating PDF download for ${subjectName}'s monthly report.`,
+      `Simulating PDF download for ${subjectId}'s monthly report.`,
       [{ text: 'OK' }]
     );
   };
@@ -66,7 +71,7 @@ const MonthlyReportScreen = () => {
           <Button
             icon="file-pdf-box"
             mode="outlined"
-            onPress={() => handleDownloadPdf(subjectGroup.subjectName)}
+            onPress={() => handleDownloadPdf(subjectGroup.subjectId)}
             textColor={theme.colors.primary}
             style={{ borderColor: theme.colors.primary }}
           >
