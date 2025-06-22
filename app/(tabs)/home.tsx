@@ -6,10 +6,10 @@ import {
   Card,
   Chip,
   IconButton,
+  Menu,
   Modal,
   Paragraph,
   Portal,
-  RadioButton,
   Text,
   TextInput,
   useTheme
@@ -25,14 +25,23 @@ const HomeScreen = () => {
   const [subjects, setSubjects] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const screenHeight = Dimensions.get('window').height;
+  const [gradeMenuVisible, setGradeMenuVisible] = useState(false);
 
   // Form state
   const [selectedSubjectId, setSelectedSubjectId] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState('');
   const [description, setDescription] = useState('');
   const [formError, setFormError] = useState('');
 
   const periods = [1, 2, 3, 4, 5, 6, 7, 8];
+  const grades = Array.from({ length: 13 }, (_, i) => ({
+    label: `Grade ${String(i + 1).padStart(2, '0')}`,
+    value: i + 1,
+  }));
+
+  const openGradeMenu = () => setGradeMenuVisible(true);
+  const closeGradeMenu = () => setGradeMenuVisible(false);
 
   useEffect(() => {
     
@@ -41,6 +50,8 @@ const HomeScreen = () => {
     if (user) {
       console.log("user", user);
       fetch(`${BASE_URL}/api/teaching-records/user/${user.id}`).then(res => res.json()).then(setRecords).catch(console.error);
+      console.log("records", records);
+      
     }
   }, [user]);
 
@@ -63,12 +74,13 @@ const HomeScreen = () => {
     setModalVisible(false);
     setSelectedSubjectId('');
     setSelectedPeriod('');
+    setSelectedGrade('');
     setDescription('');
     setFormError('');
   };
 
   const handleAddRecord = async () => {
-    if (!selectedSubjectId || !selectedPeriod || !description.trim()) {
+    if (!selectedSubjectId || !selectedPeriod || !selectedGrade || !description.trim()) {
       setFormError('All fields are required.');
       return;
     }
@@ -85,6 +97,7 @@ const HomeScreen = () => {
           userId: user.id,
           date: new Date().toISOString().split('T')[0],
           period: parseInt(selectedPeriod, 10),
+          grade: parseInt(selectedGrade, 10),
           subjectId: selectedSubjectId,
           description: description.trim(),
         }),
@@ -119,7 +132,7 @@ const HomeScreen = () => {
   const renderRecordItem = ({ item }: { item: any }) => (
     <Card style={styles.card}>
       <Card.Title
-        title={`${item.subjectName} - Period ${item.period}`}
+        title={`${item.subjectName} - Grade ${item.grade} / Period ${item.period}`}
         subtitle={`Date: ${new Date(item.date).toLocaleDateString()}`}
         titleStyle={{ color: theme.colors.primary }}
         subtitleStyle={{ color: theme.colors.onSurfaceVariant }}
@@ -186,23 +199,44 @@ const HomeScreen = () => {
                 </View>
 
                 <View style={styles.formSection}>
+                  <Text variant="titleMedium" style={[styles.label, {color: theme.colors.onSurfaceVariant}]}>Select Grade</Text>
+                  <Menu
+                    visible={gradeMenuVisible}
+                    onDismiss={closeGradeMenu}
+                    anchor={
+                      <Button mode="outlined" onPress={openGradeMenu} style={styles.dropdownButton} contentStyle={styles.dropdownButtonContent} labelStyle={styles.dropdownButtonLabel}>
+                        {selectedGrade ? grades.find(g => g.value === parseInt(selectedGrade))?.label : 'Select a Grade'}
+                      </Button>
+                    }
+                  >
+                    {grades.map((grade) => (
+                      <Menu.Item
+                        key={grade.value}
+                        onPress={() => {
+                          setSelectedGrade(String(grade.value));
+                          closeGradeMenu();
+                        }}
+                        title={grade.label}
+                      />
+                    ))}
+                  </Menu>
+                </View>
+
+                <View style={styles.formSection}>
                   <Text variant="titleMedium" style={[styles.label, {color: theme.colors.onSurfaceVariant}]}>Select Period</Text>
-                  <RadioButton.Group onValueChange={newValue => setSelectedPeriod(newValue)} value={selectedPeriod}>
-                    <View style={styles.periodContainer}>
-                      {periods.map(p => (
-                        <View key={p} style={styles.periodRadioButtonWrapper}>
-                           <Chip
-                            selected={selectedPeriod === String(p)}
-                            onPress={() => setSelectedPeriod(String(p))}
-                            style={[styles.periodChip, selectedPeriod === String(p) ? {backgroundColor: theme.colors.primaryContainer} : {}]}
-                            textStyle={[styles.periodChipText, selectedPeriod === String(p) ? {color: theme.colors.onPrimaryContainer} : {}]}
-                           >
-                            {String(p)}
-                           </Chip>
-                        </View>
-                      ))}
-                    </View>
-                  </RadioButton.Group>
+                  <View style={styles.chipGroupContainer}>
+                    {periods.map(p => (
+                        <Chip
+                          key={p}
+                          selected={selectedPeriod === String(p)}
+                          onPress={() => setSelectedPeriod(String(p))}
+                          style={[styles.subjectChip, selectedPeriod === String(p) ? {backgroundColor: theme.colors.primaryContainer} : {}]}
+                          textStyle={[styles.subjectChipText, selectedPeriod === String(p) ? {color: theme.colors.onPrimaryContainer} : {}]}
+                        >
+                          {`Period ${p}`}
+                        </Chip>
+                    ))}
+                  </View>
                 </View>
 
                 <View style={styles.formSection}>
@@ -285,6 +319,20 @@ const styles = StyleSheet.create({
     maxWidth: 500, // Max width for larger screens
     borderRadius: 16, // Softer radius for the card
     elevation: 5,
+  },
+  dropdownButton: {
+    borderWidth: 1,
+    borderColor: '#79747E', // From Paper's outlined text input
+    height: 56,
+    justifyContent: 'center',
+  },
+  dropdownButtonContent: {
+    height: '100%',
+  },
+  dropdownButtonLabel: {
+    color: '#49454F', // From Paper's text input label
+    textAlign: 'left',
+    width: '100%',
   },
   modalTitle: { // This style is now part of Card.Title
     // marginBottom: 20,
