@@ -7,7 +7,7 @@ const BASE_URL = 'https://teach-buddy-be.vercel.app';
 interface GroupedRecord {
   subjectId: string;
   subjectName: string;
-  records: TeachingRecord[];
+  records: any[];
 }
 
 const MonthlyReportScreen = () => {
@@ -80,12 +80,12 @@ const MonthlyReportScreen = () => {
         </View>
         <Divider style={styles.divider} />
         {subjectGroup.records.length > 0 ? (
-          subjectGroup.records.map(record => (
-            <View key={record.id} style={[styles.recordItemContainer, { borderLeftColor: theme.colors.secondary }]}>
-              <Paragraph style={[styles.recordDate, {color: theme.colors.secondary}]}>
-                {new Date(record.date).toLocaleDateString()} - Period {record.period}
-              </Paragraph>
-              <Paragraph>{record.description}</Paragraph>
+          subjectGroup.records.map((record, index) => (
+            <View key={index}  style={[styles.recordItem, { borderLeftColor: theme.colors.secondary }]}>
+              <Text style={styles.recordDate}>{new Date(record.date).toLocaleDateString()}</Text>
+              <Text style={styles.recordDetail}>Grade: {record.grade} / Period: {record.period}</Text>
+              <Paragraph style={styles.recordDescription}>{record.description}</Paragraph>
+              {index < subjectGroup.records.length - 1 && <Divider style={styles.divider} />}
             </View>
           ))
         ) : (
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
   divider: {
     marginVertical: 8,
   },
-  recordItemContainer: {
+  recordItem: {
     marginBottom: 10,
     paddingLeft: 8,
     borderLeftWidth: 3,
@@ -149,6 +149,13 @@ const styles = StyleSheet.create({
   recordDate: {
     fontWeight: 'bold',
     fontSize: 13,
+    marginBottom: 2,
+  },
+  recordDetail: {
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  recordDescription: {
     marginBottom: 2,
   },
   emptyText: {
