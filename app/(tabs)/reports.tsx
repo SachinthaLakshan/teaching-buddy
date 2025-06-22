@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, View } from 'react-native';
+import { Alert, FlatList, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { Button, Card, Divider, Paragraph, Text, Title, useTheme } from 'react-native-paper';
+import * as Sharing from 'expo-sharing';
 import { useAuth } from '../services/AuthContext';
+import { generateReportPdf, ReportData, ReportDataRecord } from '../services/ReportService'; // Import the service
+
 const BASE_URL = 'https://teach-buddy-be.vercel.app';
 
 interface GroupedRecord {
@@ -15,6 +18,7 @@ const MonthlyReportScreen = () => {
   const { user } = useAuth();
   const [groupedRecords, setGroupedRecords] = useState<GroupedRecord[]>([]);
   const [records, setRecords] = useState<any[]>([]);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState<string | null>(null); // To track loading state for specific subject
 
   useEffect(() => {
     if (user) {
@@ -50,17 +54,63 @@ const MonthlyReportScreen = () => {
     }
   }, [user, records]);
 
-  const handleDownloadPdf = (subjectId: string) => {
-    const group = groupedRecords.find(g => g.subjectId === subjectId);
-    if (group) {
-    
+  const handleDownloadPdf = async (subjectId: string) => {
+    if (!user) {
+      Alert.alert('Error', 'User not found.');
+      return;
     }
-    
-    Alert.alert(
-      'Download PDF',
-      `Simulating PDF download for ${subjectId}'s monthly report.`,
-      [{ text: 'OK' }]
-    );
+
+    const subjectGroup = groupedRecords.find(g => g.subjectId === subjectId);
+    if (!subjectGroup) {
+      Alert.alert('Error', 'Subject data not found.');
+      return;
+    }
+
+    setIsGeneratingPdf(subjectId); // Set loading state for this specific subject
+
+    try {
+      // Assuming 'grade' comes from the record. If not, it needs to be handled.
+      // For now, let's assume 'grade' is part of 'record.details' or similar, or use a placeholder.
+      // The provided HTML expects a 'grade' property.
+      // The 'TeachingRecord' interface in dummyData.ts does not have 'grade'.
+      // Let's proceed with the assumption that API records *do* have 'grade'.
+      // If not, we'll add a placeholder or log a warning.
+      const reportRecords: ReportDataRecord[] = subjectGroup.records.map((record: any) => ({
+        date: record.date,
+        period: record.period,
+        description: record.description,
+        // IMPORTANT: Assuming 'grade' exists on the record.
+        // If 'record.grade' is undefined, this will pass 'undefined' to the template.
+        // The template should handle this gracefully or we should provide a default.
+        // For the purpose of this task, I will use a placeholder if grade is missing.
+        grade: record.grade !== undefined ? record.grade : 'N/A',
+      }));
+
+      const reportData: ReportData = {
+        teacherName: user.name || 'N/A', // Assuming user.name is the teacher's name
+        subjectName: subjectGroup.subjectName,
+        records: reportRecords,
+      };
+
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert('Error', 'Sharing is not available on this device.');
+        setIsGeneratingPdf(null);
+        return;
+      }
+
+      const filePath = await generateReportPdf(reportData);
+      await Sharing.shareAsync(filePath, {
+        mimeType: 'application/pdf',
+        dialogTitle: `Share ${subjectGroup.subjectName} Report`,
+        UTI: 'com.adobe.pdf',
+      });
+
+    } catch (error) {
+      console.error('Failed to generate or share PDF:', error);
+      Alert.alert('Error', `Failed to generate or share PDF. ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsGeneratingPdf(null); // Clear loading state
+    }
   };
 
   const renderSubjectReportItem = ({ item: subjectGroup }: { item: GroupedRecord }) => (
@@ -68,15 +118,20 @@ const MonthlyReportScreen = () => {
       <Card.Content>
         <View style={styles.cardHeader}>
           <Title style={{ color: theme.colors.primary }}>{subjectGroup.subjectName}</Title>
-          <Button
-            icon="file-pdf-box"
-            mode="outlined"
-            onPress={() => handleDownloadPdf(subjectGroup.subjectId)}
-            textColor={theme.colors.primary}
-            style={{ borderColor: theme.colors.primary }}
-          >
-            Download PDF
-          </Button>
+          {isGeneratingPdf === subjectGroup.subjectId ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} style={styles.buttonSpinner} />
+          ) : (
+            <Button
+              icon="file-pdf-box"
+              mode="outlined"
+              onPress={() => handleDownloadPdf(subjectGroup.subjectId)}
+              textColor={theme.colors.primary}
+              style={{ borderColor: theme.colors.primary }}
+              disabled={isGeneratingPdf !== null} // Disable other buttons while one is loading
+            >
+              Download PDF
+            </Button>
+          )}
         </View>
         <Divider style={styles.divider} />
         {subjectGroup.records.length > 0 ? (
@@ -128,7 +183,7 @@ const styles = StyleSheet.create({
   },
   card: {
     marginBottom: 16,
-    elevation: 2, // Slightly less elevation than home screen cards perhaps
+    elevation: 2,
     borderWidth: 1,
   },
   cardHeader: {
@@ -136,6 +191,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+  },
+  buttonSpinner: {
+    marginLeft: 10, // Or adjust as needed for positioning next to/replacing button
   },
   divider: {
     marginVertical: 8,
