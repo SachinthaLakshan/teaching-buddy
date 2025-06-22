@@ -12,8 +12,7 @@ import {
   RadioButton,
   Text,
   TextInput,
-  Title,
-  useTheme,
+  useTheme
 } from 'react-native-paper';
 import { useAuth } from '../services/AuthContext';
 const BASE_URL = 'https://teach-buddy-be.vercel.app';
@@ -99,12 +98,35 @@ const HomeScreen = () => {
     }
   };
 
+  const handleDeleteRecord =async (recordId: string) => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/teaching-records/${recordId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete the record.');
+      }
+      
+      Alert.alert('Success', 'Record deleted successfully.');
+      refreshRecords(); // Refresh the list from the server
+    } catch (error) {
+      const err = error as Error;
+      Alert.alert('Error', err.message || 'An error occurred while deleting the record.');
+    }
+  };
+
   const renderRecordItem = ({ item }: { item: any }) => (
     <Card style={styles.card}>
+      <Card.Title
+        title={`${item.subjectName} - Period ${item.period}`}
+        subtitle={`Date: ${new Date(item.date).toLocaleDateString()}`}
+        titleStyle={{ color: theme.colors.primary }}
+        subtitleStyle={{ color: theme.colors.onSurfaceVariant }}
+        right={(props) => <IconButton {...props} icon="delete-outline" onPress={() => handleDeleteRecord(item._id)} iconColor={theme.colors.error} />}
+      />
       <Card.Content>
-        <Title style={{ color: theme.colors.primary }}>{item.subjectName} - Period {item.period}</Title>
-        <Paragraph style={[styles.dateText, { color: theme.colors.onSurfaceVariant }]}>Date: {new Date(item.date).toLocaleDateString()}</Paragraph>
-        <Paragraph>{item.description}</Paragraph>
+        <Paragraph style={{ paddingTop: 4 }}>{item.description}</Paragraph>
       </Card.Content>
     </Card>
   );
@@ -124,7 +146,7 @@ const HomeScreen = () => {
       <FlatList
         data={records}
         renderItem={renderRecordItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item._id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.colors.onSurfaceDisabled }]}>No records found for {user?.name || 'current user'}. Add one!</Text>}
       />
